@@ -1,4 +1,4 @@
-name: Simple Build APK
+name: Final Build
 on: [push]
 
 jobs:
@@ -8,7 +8,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Java Setup
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -19,14 +19,15 @@ jobs:
         with:
           gradle-version: 8.5
 
-      - name: Build with Gradle
-        # هذا الأمر سيحاول بناء أي تطبيق يجده في المستودع
+      - name: Build APK
         run: |
-          chmod +x gradlew || gradle wrapper
-          gradle assembleDebug --stacktrace
+          # توليد ملف التشغيل إذا كان مفقوداً
+          gradle wrapper
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: App-Package
-          path: "**/build/outputs/apk/debug/*.apk"
+          name: App-Ready
+          path: app/build/outputs/apk/debug/app-debug.apk
