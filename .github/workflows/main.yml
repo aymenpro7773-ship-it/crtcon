@@ -1,14 +1,14 @@
-name: Build Android APK
+name: Build APK
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: set up JDK 17
+      - name: Java Setup
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -16,14 +16,14 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.5 # إصدار مستقر ومتوافق
 
-      - name: Build with System Gradle
-        # سنستخدم 'gradle' مباشرة بدلاً من './gradlew' لتجاوز ملفاتك المفقودة
-        run: |
-          gradle assembleDebug --stacktrace
+      - name: Build APK
+        run: gradle assembleDebug --stacktrace
 
-      - name: Upload APK
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: MobileApp-Final
+          name: Final-App
           path: app/build/outputs/apk/debug/app-debug.apk
