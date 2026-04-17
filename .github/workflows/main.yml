@@ -16,16 +16,99 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Gradle
+      - name: Initialize Android Project Files
+        run: |
+          # 1. إنشاء مجلد الجردل (gradle/wrapper)
+          mkdir -p gradle/wrapper
+
+          # 2. إنشاء ملف خصائص الجردل (gradle-wrapper.properties)
+          cat <<EOF > gradle/wrapper/gradle-wrapper.properties
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
+          # 3. إنشاء ملف الإعدادات (settings.gradle)
+          cat <<EOF > settings.gradle
+          rootProject.name = "MyAndroidApp"
+          include ':app'
+          EOF
+
+          # 4. إنشاء ملف البلد جردل الرئيسي (build.gradle) مع كافة الإعدادات
+          cat <<EOF > build.gradle
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.2.2'
+              }
+          }
+
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOF
+
+          # 5. إنشاء مجلد التطبيق وملف build.gradle الخاص به
+          mkdir -p app/src/main/java/com/example/app
+          cat <<EOF > app/build.gradle
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.example.app'
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId "com.example.app"
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+          }
+          EOF
+
+          # 6. إنشاء ملف Manifest الأساسي (ضروري لبناء الـ APK)
+          mkdir -p app/src/main
+          cat <<EOF > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application android:label="My App" android:theme="@style/Theme.AppCompat.Light">
+              </application>
+          </manifest>
+          EOF
+
+      - name: Generate Gradle Wrapper (gradlew and gradlew.bat)
+        run: gradle wrapper
+
+      - name: Build APK (Assemble Debug)
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-          name: app-debug
-    
-      path: app/build/outputs/apk/debug/app-debug.apk
