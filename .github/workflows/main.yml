@@ -1,12 +1,9 @@
-name: Final Build Fix
-
-on: 
-  push:
+name: Build Android APK
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,14 +14,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      
-       
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
-      - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Fix Permissions and Build
+        # هذا الجزء يحل مشكلة Exit Code 126 التي ظهرت لك في الصورة
+        run: |
+          if [ ! -f "gradlew" ]; then
+            gradle wrapper --gradle-version 8.2
+          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Final-App-APK
+          name: My_Final_App
           path: app/build/outputs/apk/debug/app-debug.apk
