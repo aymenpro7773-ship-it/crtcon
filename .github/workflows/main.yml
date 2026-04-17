@@ -8,7 +8,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -17,17 +17,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Fix Permissions and Build
-        # هذا الجزء يحل مشكلة Exit Code 126 التي ظهرت لك في الصورة
+      - name: Build with System Gradle
+        # سنستخدم 'gradle' مباشرة بدلاً من './gradlew' لتجاوز ملفاتك المفقودة
         run: |
-          if [ ! -f "gradlew" ]; then
-            gradle wrapper --gradle-version 8.2
-          fi
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          gradle assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: My_Final_App
+          name: MobileApp-Final
           path: app/build/outputs/apk/debug/app-debug.apk
