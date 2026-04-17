@@ -1,46 +1,32 @@
-name: Ultimate Fix and Build
+name: Simple Build APK
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Fix Project Structure
-        run: |
-          # 1. إنشاء المسار الصحيح للكود
-          mkdir -p app/src/main/java/com/example/app
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-
-          # 2. نقل الملفات لأماكنها الجبرية (حتى لو كانت في المكان الخطأ)
-          find . -name "MainActivity.kt" -exec mv {} app/src/main/java/com/example/app/MainActivity.kt \;
-          find . -name "AndroidManifest.xml" -exec mv {} app/src/main/AndroidManifest.xml \;
-          
-          # 3. التأكد من أن build.gradle في مكانه الصحيح
-          if [ -f "app/build.gradle.kts" ]; then echo "Gradle exists"; else find . -name "build.gradle.kts" -exec cp {} app/build.gradle.kts \; fi
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.5
 
-      - name: Build APK
+      - name: Build with Gradle
+        # هذا الأمر سيحاول بناء أي تطبيق يجده في المستودع
         run: |
           chmod +x gradlew || gradle wrapper
-          ./gradlew assembleDebug --stacktrace
+          gradle assembleDebug --stacktrace
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Fixed-App-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: App-Package
+          path: "**/build/outputs/apk/debug/*.apk"
