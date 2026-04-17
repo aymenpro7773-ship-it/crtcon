@@ -17,25 +17,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Fix Directory Structure
-        run: |
-          # إنشاء المجلدات الرسمية لأندرويد
-          mkdir -p app/src/main/java/com/example/app
-          mkdir -p app/src/main/
-
-          # البحث عن الملفات ونقلها للمكان الصحيح (إذا لم تكن موجودة هناك بالفعل)
-          # نستخدم || true لتفادي توقف السكريبت إذا لم يجد ملفات
-          find . -name "AndroidManifest.xml" -type f ! -path "./app/src/main/AndroidManifest.xml" -exec mv {} app/src/main/ \; || true
-          find . -name "MainActivity.kt" -type f ! -path "./app/src/main/java/com/example/app/MainActivity.kt" -exec mv {} app/src/main/java/com/example/app/ \; || true
-          find . -name "MainActivity.java" -type f ! -path "./app/src/main/java/com/example/app/MainActivity.java" -exec mv {} app/src/main/java/com/example/app/ \; || true
-
-          # التأكد من وجود ملفات Gradle Wrapper وتوليدها إذا نقصت
-          if [ ! -f "gradlew" ]; then
-            gradle wrapper
-          fi
-          
-          # إعطاء صلاحية التنفيذ لملف الجردل
-          chmod +x gradlew
+      
+       
 
       - name: Build APK
         run: ./gradlew assembleDebug --stacktrace
